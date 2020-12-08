@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: 'The crazy number workflow, a dummy logic based on random number generation
+
+  '
+Parameters:
+  OpenAPIS3File:
+    Description: '"openapi.yaml" file location'
+    Default: ./openapi.yaml
+    Type: String
+Globals:
+  Function:
+    Runtime: python3.7
+    Timeout: 30
+    MemorySize: 256
+Resources:
+  LambdaRoleForRuleExecution:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: ${AWS::StackName}-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: sts:AssumeRole
+          Principal:
+            Service: lambda.amazonaws.com
+      Policies:
+      - PolicyName: WriteCloudWatchLogs
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+  ApiGatewayStepFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path:
+        Fn::Join:
+        - ''
+        - - /
+          - Ref: AWS::StackName
+          - /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: AllowApiGatewayServiceToAssumeRole
+          Effect: Allow
+          Action:
+          - sts:AssumeRole
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+      Policies:
+      - PolicyName: CallStepFunctions
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - states:StartExecution
+            Resource:
+              Ref: Workflow
+      - PolicyName: DescribeStepFunctionExecutions
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - states:DescribeExecution
+            Resource:
+              Fn::Sub: arn:aws:states:${AWS::Region}:${AWS::AccountId}:execution:${Workflow.Name}:*
+  StateExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - Fn::Sub: states.${AWS::Region}.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: StatesExecutionPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: lambda:InvokeFunction
+            Resource:
+            - Fn::GetAtt:
+              - RandomNumber
+              - Arn
+            - Fn::GetAtt:
+              - Init
+              - Arn
+            - Fn::GetAtt:
+              - Execute
+              - Arn
+            - Fn::GetAtt:
+              - End
+              - Arn
+  RandomNumber:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: RandomNumber
+      Handler: random_number.lambda_handler
+      Role:
+        Fn::GetAtt:
+        - LambdaRoleForRuleExecution
+        - Arn
+  Init:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: Init
+      Handler: random_number.lambda_handler_2
+      Role:
+        Fn::GetAtt:
+        - LambdaRoleForRuleExecution
+        - Arn
+  Execute:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: Execute
+      Handler: random_number.lambda_handler_3
+      Role:
+        Fn::GetAtt:
+        - LambdaRoleForRuleExecution
+        - Arn
+  End:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: End
+      Handler: random_number.lambda_handler_4
+      Role:
+        Fn::GetAtt:
+        - LambdaRoleForRuleExecution
+        - Arn
+  Workflow:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName:
+        Fn::Sub: ${AWS::StackName}-state-machine
+      RoleArn:
+        Fn::GetAtt:
+        - StateExecutionRole
+        - Arn
+      DefinitionString:
+        Fn::Sub: "{\n  \"Comment\": \"AWS Step Functions Example\",\n  \"StartAt\"\
+          : \"RandomNumber\",\n  \"Version\": \"1.0\",\n  \"States\": {\n    \"RandomNumber\"\
+          : {\n      \"Type\": \"Task\",\n      \"Resource\": \"${RandomNumber.Arn}\"\
+          ,\n      \"Next\": \"Revision\",\n      \"Retry\": [{\n        \"ErrorEquals\"\
+          : [\"States.TaskFailed\"],\n        \"IntervalSeconds\": 1,\n        \"\
+          MaxAttempts\": 2,\n        \"BackoffRate\": 2.0\n      }],\n      \"Catch\"\
+          : [{\n        \"ErrorEquals\": [\"States.TaskFailed\"],\n        \"Next\"\
+          : \"Unlucky13\"\n      }]\n    },\n    \"Revision\": {\n      \"Type\":\
+          \ \"Choice\",\n      \"Default\": \"Init\",\n      \"Choices\": [{\n   \
+          \     \"Variable\": \"$.number\",\n        \"NumericEquals\": 7,\n     \
+          \   \"Next\": \"Lucky7\"\n      }]\n    },\n    \"Init\": {\n      \"Type\"\
+          : \"Task\",\n      \"Resource\": \"${Init.Arn}\",\n      \"Next\": \"Map\"\
+          \n    },\n    \"Map\": {\n      \"Type\": \"Map\",\n      \"ItemsPath\"\
+          : \"$.numbers\",\n      \"MaxConcurrency\": 2,\n      \"Next\": \"End\"\
+          ,\n      \"Iterator\": {\n        \"StartAt\": \"Execute\",\n        \"\
+          States\": {\n          \"Execute\": {\n            \"Type\": \"Task\",\n\
+          \            \"Resource\": \"${Execute.Arn}\",\n            \"Next\": \"\
+          WaitPlz\"\n          },\n          \"WaitPlz\": {\n            \"Type\"\
+          : \"Wait\",\n            \"Seconds\": 2,\n            \"End\": true\n  \
+          \        }\n        }\n      }\n    },\n    \"End\": {\n      \"Type\":\
+          \ \"Task\",\n      \"Resource\": \"${End.Arn}\",\n      \"End\": true\n\
+          \    },\n    \"Lucky7\": {\n      \"Type\": \"Succeed\"\n    },\n    \"\
+          Unlucky13\": {\n      \"Type\": \"Fail\",\n      \"Cause\": \"Bad luck\"\
+          ,\n      \"Error\": \":(\"\n    }\n  }\n}\n"
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: random-workflow
+      Name:
+        Fn::Sub: ${AWS::StackName}-api
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location:
+              Ref: OpenAPIS3File
+Outputs:
+  ApiUrl:
+    Description: API URL
+    Value:
+      Fn::Sub: https://${Api}.execute-api.${AWS::Region}.amazonaws.com/random-workflow
