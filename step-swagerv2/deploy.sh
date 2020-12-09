@@ -22,7 +22,7 @@ BUCKET_FOLDER="s3://$S3_BUCKET/$STACK_NAME/openapi.yaml"
 echo ${BUCKET}
 echo ${FILENAME}
 
-aws s3 cp step-swager_2/openapi.yaml ${BUCKET_FOLDER} --sse
+aws s3 cp step-swagerv2/openapi.yaml ${BUCKET_FOLDER} --sse
 
-sam build --template-file step-swager_2/template.yaml && sam package --output-template-file packaged.yaml --s3-bucket ${S3_BUCKET} \
+sam build --template-file step-swagerv2/template.yaml && sam package --output-template-file packaged.yaml --s3-bucket ${S3_BUCKET} \
 && sam deploy --template-file packaged.yaml --capabilities CAPABILITY_NAMED_IAM --stack-name ${STACK_NAME} --parameter-overrides OpenAPIS3File=${BUCKET_FOLDER}
