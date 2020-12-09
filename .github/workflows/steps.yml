@@ -1,6 +1,6 @@
 name: steps
 on:
-  push:
+  pull_request:
     branches: 
       - master
       - testing
