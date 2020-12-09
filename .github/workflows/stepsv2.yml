@@ -1,17 +1,12 @@
 name: stepsv2
 on:
-  push:
-    branches:
-      - dev
-    paths:
-      - .github/workflows/stepsv2.yml
-      - step-swagerv2/**
   pull_request:
     branches: 
       - master
+      - dev
     paths:
-      - .github/workflows/stepsv2.yml
-      - step-swagerv2/**
+      - .github/workflows/steps.yml
+      - step-swager/**
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,4 +39,4 @@ jobs:
           export "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
           echo $PWD
-          ./step-swagerv2/deploy.sh step-function-v2-${GITHUB_REF##*/} pablo-email-test step-swagerv2/
+          ./step-swagerv2/deploy.sh step-function-v2-${{github.base_ref}} pablo-email-test step-swagerv2/
