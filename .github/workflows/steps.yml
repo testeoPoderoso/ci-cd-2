@@ -8,8 +8,6 @@ on:
     paths:
       - .github/workflows/steps.yml
       - step-swager/**
-    types:
-      - closed
 jobs:
   build:
     runs-on: ubuntu-latest
