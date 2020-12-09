@@ -1,4 +1,4 @@
-name: steps
+name: stepsv2
 on:
   push:
     branches:
@@ -44,4 +44,4 @@ jobs:
           export "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
           echo $PWD
-          ./step-swagerv2/deploy.sh step-function-${GITHUB_REF##*/} pablo-email-test step-swagerv2/
+          ./step-swagerv2/deploy.sh step-function-v2-${GITHUB_REF##*/} pablo-email-test step-swagerv2/
