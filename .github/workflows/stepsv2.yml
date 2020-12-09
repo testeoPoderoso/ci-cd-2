@@ -4,14 +4,14 @@ on:
     branches:
       - dev
     paths:
-      - .github/workflows/steps.yml
-      - step-swager/**
+      - .github/workflows/stepsv2.yml
+      - step-swagerv2/**
   pull_request:
     branches: 
       - master
     paths:
-      - .github/workflows/steps.yml
-      - step-swager/**
+      - .github/workflows/stepsv2.yml
+      - step-swagerv2/**
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,11 +26,11 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r step-swager/lambda/requirements.txt
+          pip install -r step-swagerv2/lambda/requirements.txt
 
       - name: Make executeable
         run: |
-          chmod +x step-swager/deploy.sh
+          chmod +x step-swagerv2/deploy.sh
 
       - name: Deploy
         uses: tkt-actions/aws-sam-cli@v1
@@ -44,4 +44,4 @@ jobs:
           export "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
           echo $PWD
-          ./step-swager/deploy.sh step-function-${GITHUB_REF##*/} pablo-email-test step-swager/
+          ./step-swagerv2/deploy.sh step-function-${GITHUB_REF##*/} pablo-email-test step-swagerv2/
