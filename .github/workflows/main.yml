@@ -23,9 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          working-directory: ./step-swager
           python -m pip install --upgrade pip
-          pip install -r lambda/requirements.txt
+          pip install -r step-swager/lambda/requirements.txt
 
       - name: Deploy
         uses: tkt-actions/aws-sam-cli@v1
@@ -40,4 +39,4 @@ jobs:
           export "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
           echo $PWD
-          ./deploy_step.sh step-function-${GITHUB_REF##*/}
+          ./deploy_step.sh step-swager/step-function-${GITHUB_REF##*/}
