@@ -30,7 +30,7 @@ jobs:
 
       - name: Make executeable
         run: |
-          chmod +x step-swager/deploy_step.sh
+          chmod +x step-swager/deploy.sh
 
       - name: Deploy
         uses: tkt-actions/aws-sam-cli@v1
@@ -44,4 +44,4 @@ jobs:
           export "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
           echo $PWD
-          ./step-swager/deploy_step.sh step-function-${GITHUB_REF##*/}
+          ./step-swager/deploy.sh step-function-${GITHUB_REF##*/}
