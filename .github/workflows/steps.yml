@@ -1,16 +1,14 @@
-name: steps
+name: Back Actions
 on:
   push:
     branches:
       - dev
     paths:
-      - .github/workflows/steps.yml
       - step-swager/**
   pull_request:
     branches: 
       - main
     paths:
-      - .github/workflows/steps.yml
       - step-swager/**
 jobs:
   build:
