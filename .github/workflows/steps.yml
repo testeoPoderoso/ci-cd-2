@@ -29,7 +29,8 @@ jobs:
           pip install -r step-swager/lambda/requirements.txt
 
       - name: Make executeable
-          run: chmod +x step-swager/deploy.sh
+        run: |
+          chmod +x step-swager/deploy.sh
 
       - name: Deploy
         uses: tkt-actions/aws-sam-cli@v1
