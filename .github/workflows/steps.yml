@@ -30,7 +30,7 @@ jobs:
 
       - name: Make executeable
         run: |
-          chmod +x ./step-swager/deploy_step.sh
+          chmod +x step-swager/deploy_step.sh
 
       - name: Deploy
         uses: tkt-actions/aws-sam-cli@v1
