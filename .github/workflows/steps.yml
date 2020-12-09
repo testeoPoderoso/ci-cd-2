@@ -1,14 +1,16 @@
-name: Back Actions
+name: steps
 on:
   push:
     branches:
       - dev
     paths:
+      - .github/workflows/steps.yml
       - step-swager/**
   pull_request:
     branches: 
       - main
     paths:
+      - .github/workflows/steps.yml
       - step-swager/**
 jobs:
   build:
@@ -26,6 +28,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r step-swager/lambda/requirements.txt
 
+      - name: Make executeable
+          run: chmod +x ./step-swager/deploy_step.sh
+
       - name: Deploy
         uses: tkt-actions/aws-sam-cli@v1
         env:
@@ -38,4 +43,4 @@ jobs:
           export "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
           echo $PWD
-          sh step-swager/deploy_step.sh step-function-${GITHUB_REF##*/}
+          ./step-swager/deploy_step.sh step-function-${GITHUB_REF##*/}
