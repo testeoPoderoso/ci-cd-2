@@ -8,6 +8,8 @@ on:
     paths:
       - .github/workflows/steps.yml
       - step-swager/**
+    types:
+      - closed
 jobs:
   build:
     if: github.event.pull_request.merged == 'true'
