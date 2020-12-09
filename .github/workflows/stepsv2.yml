@@ -6,8 +6,8 @@ on:
       - testing
       - dev
     paths:
-      - .github/workflows/steps.yml
-      - step-swager/**
+      - .github/workflows/stepsv2.yml
+      - step-swagerv2/**
 jobs:
   build:
     runs-on: ubuntu-latest
