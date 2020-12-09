@@ -44,4 +44,4 @@ jobs:
           export "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           export "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}"
           echo $PWD
-          ./step-swager/deploy.sh step-function-${GITHUB_REF##*/} pablo-email-test step-swager/
+          ./step-swager/deploy.sh step-function-${{github.base_ref}} pablo-email-test step-swager/
