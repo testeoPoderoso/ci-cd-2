@@ -1,14 +1,9 @@
 name: steps
 on:
-  push:
-    branches:
-      - dev
-    paths:
-      - .github/workflows/steps.yml
-      - step-swager/**
   pull_request:
     branches: 
       - master
+      - dev
     paths:
       - .github/workflows/steps.yml
       - step-swager/**

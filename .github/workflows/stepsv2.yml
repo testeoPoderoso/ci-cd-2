@@ -1,17 +1,12 @@
 name: stepsv2
 on:
-  push:
-    branches:
-      - dev
-    paths:
-      - .github/workflows/stepsv2.yml
-      - step-swagerv2/**
   pull_request:
     branches: 
       - master
+      - dev
     paths:
-      - .github/workflows/stepsv2.yml
-      - step-swagerv2/**
+      - .github/workflows/steps.yml
+      - step-swager/**
 jobs:
   build:
     runs-on: ubuntu-latest
