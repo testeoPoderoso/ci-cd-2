@@ -5,7 +5,7 @@ import json
 def lambda_handler(event, context):
 
 	n = random.randint(1,16)
-
+	print(n)
 	return {"number": n}
 
 def lambda_handler_2(event, context):
